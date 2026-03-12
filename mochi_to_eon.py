@@ -252,12 +252,17 @@ def _build_deck_tree(
     # Index decks by their Mochi ID
     deck_map: dict[str, dict] = {}  # mochi_id → eon_deck
     children_map: dict[str | None, list[str]] = {}  # parent_mochi_id → [child_mochi_ids]
+    parent_map: dict[str, str | None] = {}  # mochi_id → parent_mochi_id
+    sort_map: dict[str, int] = {}  # mochi_id → sort value
     mochi_id_order: list[str] = []
 
     for md in mochi_decks:
         mid = _get(md, "id") or ""
         parent_mid = _get(md, "parent-id")
         name = _get(md, "name") or "Unnamed Deck"
+        sort_value = _get(md, "sort")
+        if sort_value is None:
+            sort_value = 999999  # Put unsorted decks at the end
 
         # Convert cards
         mochi_cards = _get_list(md, "cards")
@@ -279,31 +284,40 @@ def _build_deck_tree(
         }
 
         deck_map[mid] = eon_deck
+        parent_map[mid] = parent_mid
+        sort_map[mid] = sort_value
         children_map.setdefault(parent_mid, []).append(mid)
         mochi_id_order.append(mid)
 
-    # Nest children under parents
+    # Nest children under parents (preserving order by sort field)
     for mid in mochi_id_order:
         child_ids = children_map.get(mid, [])
         if child_ids:
             sub_decks: list[dict] = []
             parent_eon_id = deck_map[mid]["id"]
-            for cid in child_ids:
+            # Sort children by their sort value
+            child_ids_sorted = sorted(child_ids, key=lambda cid: sort_map.get(cid, 999999))
+            for cid in child_ids_sorted:
                 child = deck_map[cid]
                 child["parentId"] = parent_eon_id
                 sub_decks.append(child)
             deck_map[mid]["subDecks"] = sub_decks
 
     # Collect root-level decks (those without a parent, or whose parent is not
-    # in the deck list)
+    # in the deck list) - ordered by sort field
     roots: list[dict] = []
-    for md in mochi_decks:
-        mid = _get(md, "id") or ""
-        parent_mid = _get(md, "parent-id")
+    root_ids: list[str] = []
+    for mid in mochi_id_order:
+        parent_mid = parent_map[mid]
         if parent_mid is None or parent_mid not in deck_map:
-            eon_deck = deck_map[mid]
-            eon_deck["parentId"] = None
-            roots.append(eon_deck)
+            root_ids.append(mid)
+    
+    # Sort roots by their sort value
+    root_ids_sorted = sorted(root_ids, key=lambda mid: sort_map.get(mid, 999999))
+    for mid in root_ids_sorted:
+        eon_deck = deck_map[mid]
+        eon_deck["parentId"] = None
+        roots.append(eon_deck)
 
     return roots
 

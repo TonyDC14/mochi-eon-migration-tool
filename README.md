@@ -1,31 +1,21 @@
-# Mochi → EON Migration Tool
+# mochi-eon-migration-tool
 
-Converts `.mochi` flashcard decks to `.eon` format.
-
-## Requirements
-
-- Python 3.10+
-- `pyyaml`
-
-```bash
-pip install pyyaml
-```
-
-## Usage
-
-```bash
-python mochi_to_eon.py "Módulo A.mochi"                        # → Módulo A.eon
-python mochi_to_eon.py "Módulo A.mochi" -o output.eon           # custom output path
-python mochi_to_eon.py "Módulo B.mochi" -n "My Deck Name"      # custom deck name
-```
-
-## What gets converted
-
-| Mochi | EON |
+| Attribute | Value |
 |---|---|
-| Text cards (`---` separator) | `NORMAL` (front/back) |
-| Diagram cards (image + cloze boxes) | `DIAGRAM` (image + diagramBoxes) |
-| Deck hierarchy (`parent-id`) | Nested `subDecks` |
-| Image attachments | `images/` directory |
-
-Unsupported Mochi features (cloze text deletions, SRS history) are skipped.
+| **Description** | Converts Mochi flashcard decks (.mochi) to EON format (.eon) |
+| **Stack** | Python 3.10+, PyYAML |
+| **Status** | Active |
+| **Port** | N/A (CLI tool) |
+| **Prerequisites** | Python 3.10+, `pip install pyyaml` |
+| **Run (dev)** | `python mochi_to_eon.py <input.mochi>` |
+| **Run (test)** | N/A |
+| **Run (lint)** | N/A |
+| **Build** | N/A |
+| **Depends on** | N/A (standalone) |
+| **API docs** | N/A |
+| **Auth** | N/A |
+| **Database** | N/A |
+| **Env vars** | N/A |
+| **Profiles** | N/A |
+| **Entry point** | `mochi_to_eon.py` |
+| **CI/CD** | N/A |
